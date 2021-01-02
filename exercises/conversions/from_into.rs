@@ -33,10 +33,23 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of Person
 // Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
-
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        let mut s_iter = s.split(",");
+        let name = s_iter.next().unwrap();
+        if !name.is_empty() {
+            if let Some(age) = s_iter.next() {
+                if let Ok(age) = age.parse::<usize>() {
+                    if let None = s_iter.next() {
+                        return Person {
+                            name: name.into(),
+                            age,
+                        };
+                    }
+                }
+            }
+        }
+        Person::default()
     }
 }
 
@@ -112,6 +125,13 @@ mod tests {
     #[test]
     fn test_missing_name_and_invalid_age() {
         let p: Person = Person::from(",one");
+        assert_eq!(p.name, "John");
+        assert_eq!(p.age, 30);
+    }
+    #[test]
+    fn test_ultra_bad_convert() {
+        // Test that "Henni,30," fails
+        let p = Person::from("Henni,30,");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
     }
